@@ -1,6 +1,5 @@
 // Clase de acceso a la base de datos de usuarios desde nodejs
 
-
 var mysql  = require('mysql');
 
 
@@ -12,19 +11,25 @@ var client = mysql.createConnection({
 });
 
 client.connect();
-client.query('USE usersDB');
+
+client.query('use usersDB');
 
 
+function insertUser(id,nombre,password){
 
-client.query(
-    'SELECT * FROM usuarios;',
-    function selectUsuario(err, results) {
 
-    if (err) {
-        console.log("Error: " + err.message);
-        throw err;
-    }
-    console.log(results);
+client.query('INSERT INTO usuarios SET id = ?, nombre = ?, password = MD5(?)',[id,nombre,password]);
 
-    client.end();
-});
+
+};
+
+
+function deleteUser(id){
+
+	client.query('DELETE FROM usuarios WHERE id=?',[id]);
+
+};
+
+deleteUser('m12');
+
+insertUser('benzema', 'Karim Benzema', 'soy el 9');
