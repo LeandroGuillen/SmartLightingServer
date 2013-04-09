@@ -1,8 +1,8 @@
-var express = require("express");//Express Middleware
+		var express = require("express");//Express Middleware
 var crypto = require('crypto'); //Crypto lib http://nodejs.org/api/crypto.html
 var http = express.createServer(); //HTTP Server (similar to a socket)
 var fs = require("fs"); //Read files
-
+var usersDBAccess = require("./usuarios");
 
 function initHttpServer(){	
 	
@@ -15,7 +15,7 @@ function initHttpServer(){
 	*/
 	function authenticate(req, res, key, user){
 		
-		var md5sum = crypto.createHash('md5');
+		/*var md5sum = crypto.createHash('md5');
 		md5sum.update(key+req.get('Date'));
 		var result = md5sum.digest('hex');
 		/* string_a.localeCompare(string_b);
@@ -27,7 +27,11 @@ function initHttpServer(){
 			return 0;
 		} else {
 			return 1;
-		}
+		}*/
+
+
+	
+		return usersDBAccess.isAuth(req.get('User-Agent'),req.get('apiKey'));
 	}
 	
 	/*
@@ -147,9 +151,19 @@ function initHttpServer(){
 		getResource(req,res,string);
 	*/
 	http.get('/', function(req,res){
-		res.writeHead(200, {"Content-Type": "text/html"});
-		res.write("SmartLighting Server!");
-		res.end();
+
+		if(users.isAuth()){
+			console.log("Esto va");
+		
+
+			res.writeHead(200, {"Content-Type": "text/html"});
+
+			res.write("SmartLighting Server!");
+			res.end();
+
+		}else{
+			console.log("else");
+		}
 	});		
 	
 	/*
