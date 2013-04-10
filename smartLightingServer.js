@@ -1,8 +1,9 @@
 var express = require("express");//Express Middleware
 var crypto = require('crypto'); //Crypto lib http://nodejs.org/api/crypto.html
-var http = express.createServer(); //HTTP Server (similar to a socket)
+var http = express(); //HTTP Server (similar to a socket)
 var fs = require("fs"); //Read files
 
+var recursos = require("./recursos");
 
 function initHttpServer(){	
 	
@@ -505,8 +506,51 @@ function initHttpServer(){
  	http.listen(8080);
 	console.log("HTTP Server initiated!");
 
+	// MIS FUNCIONES	
+	http.get('/resources/list', function(req,res){
+		//Check if some of the required headers for authentcation are "undefined"
+		if((typeof req.get('Date') === 'undefined') ||
+		(typeof req.get('apiKey') === 'undefined') ||
+		(typeof req.get('User-Agent') === 'undefined')){
+			console.log('Request non authenticated\n');
+			res.json(215, { status: 'Operation successfully non-authenticated' });
+			res.end();
+		} else { //The request is authenticated
+		
+			//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
+			var result = authenticate(req, res, 'TestKey', 'Jara');
+			console.log('Request authenticated');
+			
+			switch(result){
+				case 0: //Authentication OK
+					
+					console.log('Authentication OK');
+// 					res.json(200, { status: 'Operation successfully authenticated' });
+					recursos.listarRecursos(function (err, farolas){
+						debugger;
+						if (err)
+							console.log('Algo fallo al listar recursos');
+						else {
+							console.log('Enviando farolas...');
+							res.json(200, JSON.stringify(farolas));
+							res.end();
+						}
+					});
+// 					res.json(200, { status: 'Operation successfully authenticated' });
+// 					res.end();
+					break; 
+				case 1: //Authentication Error
+					console.log('Authentication Error');
+					res.json(402, { status: 'Authentication error' });
+					res.end();
+					break; 
+				default:
+					console.log('Error');
+					res.json(400, { status: 'Error' });
+					res.end();
+			}
+		}
+	});
 }
 
 exports.initHttpServer = initHttpServer;
-
-

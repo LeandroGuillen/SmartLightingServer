@@ -2,32 +2,18 @@
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/cmovil');
 
+var modelos = require("./mongomodelos");
+var Farola = modelos.Farola;
+
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
 	
-	// Creacion de esquemas
-	var usuarioSchema = new mongoose.Schema({
-		nombre:  String,
-		clave: String
-	});
-	var farolaSchema = new mongoose.Schema({
-		nombre: String,
-		encendida: Boolean,
-		dim: Number,
-		lat: Number,
-		lon: Number
-	});
-	
-	// Creacion de modelos
-	var Usuario = mongoose.model('Usuario', usuarioSchema);
-	var Farola = mongoose.mod335el('Farola', farolaSchema);
-	
-	// Creacion de documentos
-	var usuario1 = new Usuario({nombre: 'usuario1', clave: '111'});
-	var usuario2 = new Usuario({nombre: 'usuario2', clave: '222'});
-	var usuario3 = new Usuario({nombre: 'usuario3', clave: '333'});
-	
+
+});
+
+function crearTestDocs(){
+	// Crear documentos
 	var farola1 = new Farola({
 		nombre: 'farola1',
 		encendida: false,
@@ -50,53 +36,15 @@ db.once('open', function () {
 		lon: 1.123
 	});
 	
-	Farola.count({}, function(err, count){
-		console.log('Farola count = %d',count);
+	// Guardar documentos
+	farola1.save();
+	farola2.save();
+	farola3.save();
+}
+
+function borrarTodo(){
+	// Vaciar colecciones
+	Farola.remove({}, function(err){
+		console.log('Coleccion borrada de la base de datos.');
 	});
-	Usuario.count({}, function(err, count){
-		console.log('Usuario count = %d',count);
-	});
-	
-	Farola.find({encendida: false}, 'nombre', function (err, farolas){
-		if (err)
-			return manejarError('No puedo encontrar esa farola', err);
-		
-		var f=0;
-		for(f in farolas){
-			console.log(farolas[f].nombre);
-		}
-		console.log('farolas.length=', f);
-			
-// 			console.log('%s esta encendida.', farolas[i].nombre);
-// 			console.log('%s esta encendida.', farolas.nombre);
-// 			console.log('%s esta encendida.', farolas);
-
-	});
-	
-	console.log('Todo ok');
-	
-	
-	function restart(){
-		// Vaciar colecciones
-		Usuario.remove({}, function(err){
-			console.log('Coleccion Usuario limpiada');
-		});
-		Farola.remove({}, function(err){
-			console.log('Coleccion Usuario limpiada');
-		});
-		
-		// Guardar documentos
-		usuario1.save();
-		usuario2.save();
-		usuario3.save();
-		farola1.save();
-		farola2.save();
-		farola3.save();
-	}
-});
-
-
-
-function manejarError(msj, err) {
-	console.log(msj);
-};
+}

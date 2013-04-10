@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 
-
 // Definicion de esquemas
 var farolaSchema = new mongoose.Schema({
 	nombre: String,
