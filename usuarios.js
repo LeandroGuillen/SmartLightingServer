@@ -66,6 +66,33 @@ function checkCookie(id, oldCookie){
 }
 
 
+
+/**
+*       Crea una cookie en base a un valor y una fecha
+*
+*       id -> id del usuario al que va la cookie
+*       value -> valor para crear la cookie
+*	days -> dias de validez
+*/
+
+function createCookie(name,value,days) {
+
+        if (days) {
+
+                var date = new Date();
+                date.setTime(date.getTime()+(days*24*60*60*1000));
+                var expires = "; expires="+date.toGMTString();
+
+        }
+
+        else var expires = "";
+
+        return name+"="+value+expires+"; path=/";
+
+}
+
+
+
 /**
 *	Inserta usuario facilitando todos sus datos.
 *	id -> id del  usuario
