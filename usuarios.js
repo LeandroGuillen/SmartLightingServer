@@ -18,6 +18,55 @@ client.query('use usersDB');
 
 
 /**
+*	Registra una cookie asociada a un id
+*	
+*	id -> id del usuario
+*	cookie -> cookie para el usuario
+*/
+
+function registerCookie(id, cookie){
+	
+	client.query('INSERT INTO cookies SET cookie = ? WHERE id = ?', [cookie,id], function (err){
+		
+		if(err){
+			
+			connection.end();
+			throw err;
+	
+		}
+	});
+
+}
+
+
+/**
+*	Comprueba si una cookie pertenece a un usuario
+*
+*	id -> id del usuario
+*	cookie -> cookie para comprobar
+*
+*/
+
+function checkCookie(id, oldCookie){
+
+
+	client.query('SELECT cookie FROM cookies WHERE id = ?', [id], function (err, realCookie){
+
+		if(err){
+		
+			connection.end();
+			throw err;
+		}
+	
+		return oldCookie.localeCompare(realCookie) == 0;
+	});
+
+
+
+}
+
+
+/**
 *	Inserta usuario facilitando todos sus datos.
 *	id -> id del  usuario
 *	nombre -> nombre completo del usuario
@@ -129,3 +178,4 @@ exports.getUsuario = getUsuario;
 exports.isAuth = isAuth;
 exports.insertUser = insertUser;
 exports.deleteUser = deleteUser;
+exports.registerCookie = registerCookie;
