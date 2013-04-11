@@ -20,11 +20,11 @@ function initHttpServer(){
 		/*var md5sum = crypto.createHash('md5');
 		md5sum.update(key+req.get('Date'));
 		var result = md5sum.digest('hex');
-		/* string_a.localeCompare(string_b);
+		 string_a.localeCompare(string_b);
 				Returns:
 				 0:  exact match
 				-1:  string_a < string_b
-				 1:  string_b > string_b */
+				 1:  string_b > string_b 
 		if((req.get('User-Agent').localeCompare(user))==0 && (req.get('apiKey').localeCompare(result))==0){
 			return 0;
 		} else {
