@@ -2,7 +2,7 @@ var express = require("express"); //Express Middleware
 var crypto = require('crypto'); //Crypto lib http://nodejs.org/api/crypto.html
 var http = express(); //HTTP Server (similar to a socket)
 var fs = require("fs"); //Read files
-var recursos = require("./recursos");
+var recursos = require("./res/recursos");
 var usersDBAccess = require("./usuarios");
 
 
