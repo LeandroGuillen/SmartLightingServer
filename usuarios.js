@@ -5,7 +5,7 @@ var crypto = require('crypto');
 
 var client = mysql.createConnection({
   user: 'root',
-  password: 'root',
+  password: 'alumno',
   host: '127.0.0.1',
   port: '3306',
 });
@@ -26,11 +26,10 @@ client.query('use usersDB');
 
 function registerCookie(id, cookie){
 	
-	client.query('INSERT INTO cookies SET cookie = ? WHERE id = ?', [cookie,id], function (err){
+	client.query('UPDATE cookies SET cookie = ? WHERE id = ?', [cookie,id], function (err){
 		
 		if(err){
 			
-			connection.end();
 			throw err;
 	
 		}
@@ -114,6 +113,18 @@ function insertUser(id,nombre,password){
 
 	});
 
+		client.query('INSERT INTO cookies SET id = ?, cookie=""',[id],function (err){
+
+		if(err){
+	
+			connection.end();
+			throw err;
+	
+		}
+
+	});
+
+
 	   	
 };
 
@@ -166,18 +177,6 @@ function getNombre(id){
 
 function getPassword(id){
 
-	client.query('SELECT password FROM usuarios WHERE id=?',[id], function(err, password){
-	
-		if(err){
-	
-			connection.end();
-			throw err;
-	
-		}
-
-		return password;
-	});
-
 };
 
 
@@ -188,15 +187,59 @@ function getPassword(id){
 *	Return true si es un usuario valido o false en caso contrario
 */
 
-function isAuth(id, key, date){
+function isAuth(id, key, date,res){
 
-	var md5sum  = crypto.createHash('md');
-	md5sum.update(getPassword(id)+date);
-	var digest = md5sum.digest('hex');	
 
-	return key.localeCompare(digest) == 0;
+
+
+	client.query('SELECT password FROM usuarios WHERE id=?',[id], function(err,password){
 	
-}
+		if(err){
+	
+			connection.end();
+			throw err;
+			
+		}
+
+		console.log(password[0].password);
+
+
+	var md5sum  = crypto.createHash('md5');
+	md5sum.update(password[0].password + date);
+	var digest = md5sum.digest('hex');
+
+	if(key.localeCompare(digest) == 0){
+		console.log("Contraseña aceptada");
+
+		var cookie = createCookie(id,1,1);
+		console.log(cookie);
+
+		registerCookie(id, cookie);
+
+		// Falta probar
+		res.writeHead(200, {"Content-Type": "text/html", "Cookie": cookie});
+
+
+	}else{
+
+		console.log("Contraseña erronea");
+	}	
+
+
+	});
+
+
+	
+};
+
+/* Pruebas */
+
+var md5sum  = crypto.createHash('md5');
+	md5sum.update("da867bade88be72074368ca579d44fdb" + 1);
+	var digest = md5sum.digest('hex');
+
+isAuth("sr4",digest,"1");
+insertUser("fcoentrao","Fabio Coentrao","soy el 5");
 
 
 /***** Funciones publicas *****/
