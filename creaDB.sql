@@ -27,4 +27,8 @@ INSERT INTO usuarios VALUES('sr4','Sergio Ramos', MD5('soy el 4'));
 INSERT INTO usuarios VALUES('xabiA','Xabi Alonso', MD5('soy el 14'));
 INSERT INTO usuarios VALUES('DiMaria','Angel Di Maria', MD5('soy el 22'));
 
+INSERT INTO cookies VALUES('sr4',"");
 
+INSERT INTO cookies VALUES('xabiA',"");
+INSERT INTO cookies VALUES('mesut10',"");
+INSERT INTO cookies VALUES('DiMaria',"");
