@@ -43,27 +43,43 @@ function registerCookie(id, cookie) {
  *
  *	id -> id del usuario
  *	cookie -> cookie para comprobar
- *
  */
 
-function checkCookie(id, oldCookie) {
+
+function checkCookie(req, action) {
 
 
-	client.query('SELECT cookie FROM cookies WHERE id = ?', [id], function(err, realCookie) {
+	client.query('SELECT cookie FROM cookies WHERE id = ?', ["sr4"], function(err, cookie) {
 
 		if (err) {
 
-			connection.end();
 			throw err;
 		}
 
-		return oldCookie.localeCompare(realCookie) == 0;
+		// Se comprueba la veracidad y validez en el tiempo
+
+		if (req.localeCompare(cookie[0].cookie) == 0 && checkCookieDate(cookie[0].cookie)) {
+
+			action();
+
+		} else {
+
+			console.log("Cookie incorrecta");
+		}
 	});
-
-
 
 }
 
+
+function checkCookieDate(cookie) {
+
+
+	var cookieString = cookie.split(";");
+	var dateString = cookieString[1].split("=");
+
+	return new Date().getTime() < new Date(dateString[1]).getTime();
+
+}
 
 
 /**
@@ -204,19 +220,19 @@ function authenticate(id, key, date, response) {
 
 		// Compara las dos contraseñas y construye la respuesta en base a ellas
 		if (key.localeCompare(digest) == 0) {
-			
-			console.log("Usuario conectado: "+id);
+
+			console.log("Usuario conectado: " + id);
 			console.log("CONTRASEÑA ACEPTADA");
 
 			var cookie = createCookie(id, 1, 1);
-			
+
 			console.log("Cookie : " + cookie);
 			registerCookie(id, cookie);
 			response(cookie, true);
-	
+
 		} else {
 
-	
+
 			console.log("Contraseña erronea");
 
 			response(null, false);
@@ -238,6 +254,11 @@ authenticate("sr4", digest, "1");
 insertUser("fcoentrao", "Fabio Coentrao", "soy el 5");
 */
 
+if (checkCookieDate("sr4=1; expires=Wed, 17 Apr 2013 14:12:20 GMT; path=/")) console.log("Cookie correcta en tiempo");
+/*checkCookie("sr4=1; expires=Wed, 17 Apr 2013 14:12:20 GMT; path=/", function() {
+	console.log("Cookie aceptada");
+});
+*/
 /***** Funciones publicas *****/
 
 // exports.getUsuario = getUsuario;
