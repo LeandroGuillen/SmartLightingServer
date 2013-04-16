@@ -17,22 +17,19 @@ function initHttpServer(){
 	*/
 	function authenticate(req, res, key, user){
 		
-		/*var md5sum = crypto.createHash('md5');
-		md5sum.update(key+req.get('Date'));
-		var result = md5sum.digest('hex');
-		/* string_a.localeCompare(string_b);
-				Returns:
-				 0:  exact match
-				-1:  string_a < string_b
-				 1:  string_b > string_b */
-		if((req.get('User-Agent').localeCompare(user))==0 && (req.get('apiKey').localeCompare(result))==0){
-			return 0;
-		} else {
-			return 1;
-		}*/
-
-
-	
+// 		var md5sum = crypto.createHash('md5');
+// 		md5sum.update(key+req.get('Date'));
+// 		var result = md5sum.digest('hex');
+// 		string_a.localeCompare(string_b);
+// 				Returns:
+// 				 0:  exact match
+// 				-1:  string_a < string_b
+// 				 1:  string_b > string_b
+// 		if((req.get('User-Agent').localeCompare(user))==0 && (req.get('apiKey').localeCompare(result))==0){
+// 			return 0;
+// 		} else {
+// 			return 1;
+// 		}
 		return usersDBAccess.isAuth(req.get('User-Agent'),req.get('apiKey'));
 	}
 	
@@ -168,15 +165,20 @@ function initHttpServer(){
 		}
 	});		
 	
+	// Comprueba que no falta ningun campo necesario para la autenticacion
+	function comprobarCamposHTTP(req){
+		return (typeof req.get('Date') === 'undefined') ||
+		(typeof req.get('apiKey') === 'undefined') ||
+		(typeof req.get('User-Agent') === 'undefined');
+	}
+	
 	/*
 		Status resource
 	*/
 	http.get('/status', function(req,res){
 		
 		//Check if some of the required headers for authentcation are "undefined"
-		if((typeof req.get('Date') === 'undefined') ||
-		(typeof req.get('apiKey') === 'undefined') ||
-		(typeof req.get('User-Agent') === 'undefined')){
+		if(comprobarCamposHTTP(req)){
 			console.log('Request non authenticated\n');
 			res.json(215, { status: 'Operation successfully non-authenticated' });
 			res.end();
@@ -213,9 +215,7 @@ function initHttpServer(){
 	http.get('/testauth', function(req,res){
 		
 		//Check if some of the required headers for authentcation are "undefined"
-		if((typeof req.get('Date') === 'undefined') ||
-		(typeof req.get('apiKey') === 'undefined') ||
-		(typeof req.get('User-Agent') === 'undefined')){
+		if(comprobarCamposHTTP(req)){
 			console.log('Request non authenticated - Error\n');
 			res.json(400, { status: 'Error' });
 			res.end();
@@ -252,9 +252,7 @@ function initHttpServer(){
 	http.get('/temp/temp0', function(req,res){
 		
 		//Check if some of the required headers for authentcation are "undefined"
-		if((typeof req.get('Date') === 'undefined') ||
-		(typeof req.get('apiKey') === 'undefined') ||
-		(typeof req.get('User-Agent') === 'undefined')){
+		if(comprobarCamposHTTP(req)){
 			console.log('Request non authenticated\n');
 			res.json(215, { status: 'Operation successfully non-authenticated', temp: getTemperature() });
 			res.end();
@@ -293,9 +291,7 @@ function initHttpServer(){
 	http.get('/light/light0', function(req,res){
 		
 		//Check if some of the required headers for authentcation are "undefined"
-		if((typeof req.get('Date') === 'undefined') ||
-		(typeof req.get('apiKey') === 'undefined') ||
-		(typeof req.get('User-Agent') === 'undefined')){
+		if(comprobarCamposHTTP(req)){
 			console.log('Request non authenticated\n');
 			
 			/* First check that the parameter is defiened in order to avoid errors, second that the value is true */
@@ -371,9 +367,7 @@ function initHttpServer(){
 	http.get('/streetlight/streetlight0', function(req,res){
 		
 		//Check if some of the required headers for authentcation are "undefined"
-		if((typeof req.get('Date') === 'undefined') ||
-		(typeof req.get('apiKey') === 'undefined') ||
-		(typeof req.get('User-Agent') === 'undefined')){
+		if(comprobarCamposHTTP(req)){
 			console.log('Request non authenticated\n');
 			
 			if( !(typeof req.param('lat') === 'undefined') &&
@@ -522,11 +516,9 @@ function initHttpServer(){
 	console.log("HTTP Server initiated!");
 
 	// MIS FUNCIONES	
-	http.get('/resources/list', function(req,res){
+	http.get('/resources/streetlight/list', function(req,res){
 		//Check if some of the required headers for authentcation are "undefined"
-		if((typeof req.get('Date') === 'undefined') ||
-		(typeof req.get('apiKey') === 'undefined') ||
-		(typeof req.get('User-Agent') === 'undefined')){
+		if(comprobarCamposHTTP(req)){
 			console.log('Request non authenticated\n');
 			res.json(215, { status: 'Operation successfully non-authenticated' });
 			res.end();
@@ -565,6 +557,44 @@ function initHttpServer(){
 					res.end();
 			}
 		}
+	});
+	
+	http.get('/resources/streetlight/testlist', function(req,res){
+	
+		//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
+// 		var result = authenticate(req, res, 'TestKey', 'Jara');
+		var result = 0;
+		console.log('Request authenticated');
+		
+		switch(result){
+			case 0: //Authentication OK
+				
+				console.log('Authentication OK');
+// 					res.json(200, { status: 'Operation successfully authenticated' });
+				recursos.listarRecursos(function (err, farolas){
+					debugger;
+					if (err)
+						console.log('Algo fallo al listar recursos');
+					else {
+						console.log('Enviando farolas...');
+						res.json(200, JSON.stringify(farolas));
+						res.end();
+					}
+				});
+// 					res.json(200, { status: 'Operation successfully authenticated' });
+// 					res.end();
+				break; 
+			case 1: //Authentication Error
+				console.log('Authentication Error');
+				res.json(402, { status: 'Authentication error' });
+				res.end();
+				break; 
+			default:
+				console.log('Error');
+				res.json(400, { status: 'Error' });
+				res.end();
+		}
+		
 	});
 }
 

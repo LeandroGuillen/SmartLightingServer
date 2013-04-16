@@ -5,7 +5,7 @@ var crypto = require('crypto');
 
 var client = mysql.createConnection({
   user: 'root',
-  password: 'alumno',
+  password: 'root',
   host: '127.0.0.1',
   port: '3306',
 });
@@ -125,7 +125,7 @@ function isAuth(id, key, date){
 
 /***** Funciones publicas *****/
 
-exports.getUsuario = getUsuario;
+// exports.getUsuario = getUsuario;
 exports.isAuth = isAuth;
 exports.insertUser = insertUser;
 exports.deleteUser = deleteUser;
