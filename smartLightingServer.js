@@ -17,7 +17,6 @@ function initHttpServer(){
 	*/
 	function authenticate(req, res, key, user){
 		
-<<<<<<< HEAD
 // 		var md5sum = crypto.createHash('md5');
 // 		md5sum.update(key+req.get('Date'));
 // 		var result = md5sum.digest('hex');
@@ -598,6 +597,22 @@ function initHttpServer(){
 		}
 		
 	});
+	
+	http.get('/resources/weather', function(req,res){
+		var result = 0;
+		console.log('Request authenticated');
+		console.log('Authentication OK');
+		recursos.getUltimoTiempo(function (err, datos){
+			if (err)
+				console.log('Algo fallo al acceder a la base de datos de Tiempo');
+			else {
+				res.json(200, JSON.stringify(datos));
+				res.end();
+			}
+		});
+		
+	});
+	
 }
 
 exports.initHttpServer = initHttpServer;
