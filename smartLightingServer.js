@@ -147,19 +147,43 @@ function initHttpServer() {
 	});
 
 
-	/*
-		Default ROOT directory
-		getResource(req,res,string);
-	*/
+	/**
+	 *	Autentica un usuario y devuelve una cookie para acceso posterior
+	 *
+	 *
+	 */
 	http.get('/auth', function(req, res) {
 
+		/*Pruebas REST
+		var md5sum = crypto.createHash('md5');
+		md5sum.update(req.get('apiKey') + req.get('Dates'));
+		var digest = md5sum.digest('hex');
+		poner digest como argumento
+		*/
 
-	
+		// Solicitamos la autenticacion al adaptador
+		usersDBAccess.authenticate(req.get('User'), req.get('apiKey'), req.get('Dates'), function(cookie, result) {
 
-		// TODO : Falta devolver un resultado en el res (la cookie)
-		usersDBAccess.authenticate(req.get('User'), apiKey, req.get('Dates'));
 
-});
+			// Se devuelve una respuesta en funcion del resultado de la peticion
+			if (result) {
+				res.writeHead(200, {
+					"Content-Type": "text/html",
+					"Cookie": cookie
+				});
+				res.write("Bienvenido de nuevo " + req.get('User'));
+				res.end();
+			} else {
+				res.json(402, {
+					status: 'Authentication error. Usuario o contraseña incorrectos'
+				});
+				res.end();
+			}
+
+
+		});
+
+	});
 
 	// Comprueba que no falta ningun campo necesario para la autenticacion
 

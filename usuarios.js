@@ -182,9 +182,9 @@ function getPassword(id) {
  *	Return true si es un usuario valido o false en caso contrario
  */
 
-function authenticate(id, key, date) {
+function authenticate(id, key, date, response) {
 
-
+	// Consulta la contraseña en la base de datos
 	client.query('SELECT password FROM usuarios WHERE id=?', [id], function(err, password) {
 
 		if (err) {
@@ -193,25 +193,33 @@ function authenticate(id, key, date) {
 
 		}
 
-		console.log(password[0].password);
+		console.log("CONSULTANDO LA BASE DE DATOS PARA OBTENER CONTRASEÑA")
 
+		// Hace el hash de la contraseña y la fecha
 
 		var md5sum = crypto.createHash('md5');
 		md5sum.update(password[0].password + date);
 		var digest = md5sum.digest('hex');
 
+
+		// Compara las dos contraseñas y construye la respuesta en base a ellas
 		if (key.localeCompare(digest) == 0) {
-			console.log("Contraseña aceptada");
+			
+			console.log("Usuario conectado: "+id);
+			console.log("CONTRASEÑA ACEPTADA");
 
 			var cookie = createCookie(id, 1, 1);
-			console.log(cookie);
-
+			
+			console.log("Cookie : " + cookie);
 			registerCookie(id, cookie);
-
-
+			response(cookie, true);
+	
 		} else {
 
+	
 			console.log("Contraseña erronea");
+
+			response(null, false);
 		}
 
 
