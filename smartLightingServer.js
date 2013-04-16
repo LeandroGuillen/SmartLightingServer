@@ -17,6 +17,7 @@ function initHttpServer(){
 	*/
 	function authenticate(req, res, key, user){
 		
+<<<<<<< HEAD
 // 		var md5sum = crypto.createHash('md5');
 // 		md5sum.update(key+req.get('Date'));
 // 		var result = md5sum.digest('hex');
@@ -30,6 +31,7 @@ function initHttpServer(){
 // 		} else {
 // 			return 1;
 // 		}
+	
 		return usersDBAccess.isAuth(req.get('User-Agent'),req.get('apiKey'));
 	}
 	

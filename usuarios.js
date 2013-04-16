@@ -18,6 +18,82 @@ client.query('use usersDB');
 
 
 /**
+*	Registra una cookie asociada a un id
+*	
+*	id -> id del usuario
+*	cookie -> cookie para el usuario
+*/
+
+function registerCookie(id, cookie){
+	
+	client.query('INSERT INTO cookies SET cookie = ? WHERE id = ?', [cookie,id], function (err){
+		
+		if(err){
+			
+			connection.end();
+			throw err;
+	
+		}
+	});
+
+}
+
+
+/**
+*	Comprueba si una cookie pertenece a un usuario
+*
+*	id -> id del usuario
+*	cookie -> cookie para comprobar
+*
+*/
+
+function checkCookie(id, oldCookie){
+
+
+	client.query('SELECT cookie FROM cookies WHERE id = ?', [id], function (err, realCookie){
+
+		if(err){
+		
+			connection.end();
+			throw err;
+		}
+	
+		return oldCookie.localeCompare(realCookie) == 0;
+	});
+
+
+
+}
+
+
+
+/**
+*       Crea una cookie en base a un valor y una fecha
+*
+*       id -> id del usuario al que va la cookie
+*       value -> valor para crear la cookie
+*	days -> dias de validez
+*/
+
+function createCookie(name,value,days) {
+
+        if (days) {
+
+                var date = new Date();
+                date.setTime(date.getTime()+(days*24*60*60*1000));
+                var expires = "; expires="+date.toGMTString();
+
+        }
+
+        else var expires = "";
+
+        return name+"="+value+expires+"; path=/";
+
+}
+
+
+
+/**
 *	Inserta usuario facilitando todos sus datos.
 *	id -> id del  usuario
 *	nombre -> nombre completo del usuario
@@ -129,3 +205,4 @@ function isAuth(id, key, date){
 exports.isAuth = isAuth;
 exports.insertUser = insertUser;
 exports.deleteUser = deleteUser;
+exports.registerCookie = registerCookie;
