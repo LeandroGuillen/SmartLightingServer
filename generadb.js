@@ -1,4 +1,3 @@
-// getting-started.js
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/cmovil');
 
@@ -8,11 +7,13 @@ var Farola = modelos.Farola;
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
-	
+
+	// 	crearFarolas(); // Para insertar documentos
+	// 	borrarTodo(); // Elimina bbdd
 
 });
 
-function crearTestDocs(){
+function crearFarolas(){
 	// Crear documentos
 	var farola1 = new Farola({
 		nombre: 'farola1',
