@@ -200,8 +200,10 @@ function getPassword(id) {
 
 function authenticate(id, key, date, response) {
 
+
+	console.log(id+ " "+ key +" "+" "+date);
 	// Consulta la contraseña en la base de datos
-	client.query('SELECT password FROM usuarios WHERE id=?', [id], function(err, password) {
+	client.query('SELECT password FROM usuarios WHERE id=?', [id], function(err,password) {
 
 		if (err) {
 
@@ -213,6 +215,7 @@ function authenticate(id, key, date, response) {
 
 		// Hace el hash de la contraseña y la fecha
 
+		console.log(password[0].password);
 		var md5sum = crypto.createHash('md5');
 		md5sum.update(password[0].password + date);
 		var digest = md5sum.digest('hex');

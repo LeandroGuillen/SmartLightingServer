@@ -161,9 +161,9 @@ function initHttpServer() {
 		var digest = md5sum.digest('hex');
 		poner digest como argumento
 		*/
-
+		console.log(req.get('User-Agent'));
 		// Solicitamos la autenticacion al adaptador
-		usersDBAccess.authenticate(req.get('User'), req.get('apiKey'), req.get('Dates'), function(cookie, result) {
+		usersDBAccess.authenticate(req.get('User-Agent'), req.get('apiKey'), req.get('Date'), function(cookie, result) {
 
 
 			// Se devuelve una respuesta en funcion del resultado de la peticion
