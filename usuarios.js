@@ -26,14 +26,17 @@ client.query('use usersDB');
 
 function registerCookie(id, cookie) {
 
-	client.query('UPDATE cookies SET cookie = ? WHERE id = ?', [cookie, id], function(err) {
+	if (checkLength(id, cookie)) {
 
-		if (err) {
+		client.query('UPDATE cookies SET cookie = ? WHERE id = ?', [cookie, id], function(err) {
 
-			throw err;
+			if (err) {
 
-		}
-	});
+				throw err;
+
+			}
+		});
+	}
 
 }
 
@@ -46,27 +49,29 @@ function registerCookie(id, cookie) {
  */
 
 
-function checkCookie(req, action) {
+function checkCookie(id, userCookie, action) {
 
+	if (checkLength(id, userCookie)) {
 
-	client.query('SELECT cookie FROM cookies WHERE id = ?', ["sr4"], function(err, cookie) {
+		client.query('SELECT cookie FROM cookies WHERE id = ?', [id], function(err, cookie) {
 
-		if (err) {
+			if (err) {
 
-			throw err;
-		}
+				throw err;
+			}
 
-		// Se comprueba la veracidad y validez en el tiempo
+			// Se comprueba la veracidad y validez en el tiempo
 
-		if (req.localeCompare(cookie[0].cookie) == 0 && checkCookieDate(cookie[0].cookie)) {
+			if (userCookie.localeCompare(cookie[0].cookie) == 0 && checkCookieDate(cookie[0].cookie)) {
 
-			action();
+				action();
 
-		} else {
+			} else {
 
-			console.log("Cookie incorrecta");
-		}
-	});
+				console.log("Cookie incorrecta");
+			}
+		});
+	}
 
 }
 
@@ -116,29 +121,32 @@ function createCookie(name, value, days) {
 
 function insertUser(id, nombre, password) {
 
-	client.query('INSERT INTO usuarios SET id = ?, nombre = ?, password = MD5(?)', [id, nombre, password], function(err) {
 
-		if (err) {
+	if (checkLength(id, nombre, password)) {
 
+		client.query('INSERT INTO usuarios SET id = ?, nombre = ?, password = MD5(?)', [id, nombre, password], function(err) {
 
-			throw err;
-
-		}
-
-	});
-
-	client.query('INSERT INTO cookies SET id = ?, cookie=""', [id], function(err) {
-
-		if (err) {
-			throw err;
-
-		}
-
-	});
+			if (err) {
 
 
+				throw err;
 
-};
+			}
+
+		});
+
+		client.query('INSERT INTO cookies SET id = ?, cookie=""', [id], function(err) {
+
+			if (err) {
+				throw err;
+
+			}
+
+		});
+
+	}
+
+}
 
 
 /**
@@ -148,16 +156,20 @@ function insertUser(id, nombre, password) {
 
 function deleteUser(id) {
 
-	client.query('DELETE FROM usuarios WHERE id=?', [id], function(err) {
+	if (checkLength(id)) {
 
-		if (err) {
-			connection.end();
-			throw err;
-		}
 
-	});
+		client.query('DELETE FROM usuarios WHERE id=?', [id], function(err) {
 
-};
+			if (err) {
+				connection.end();
+				throw err;
+			}
+
+		});
+	}
+
+}
 
 
 /**
@@ -167,28 +179,21 @@ function deleteUser(id) {
 
 function getNombre(id) {
 
-	client.query('SELECT nombre FROM usuarios WHERE id=?', [id], function(err, nombre) {
-
-		if (err) {
-
-			throw err;
-
-		}
-
-		return nombre;
-	});
-
-};
+	if (checkLength(id)) {
 
 
-/**
- *	Obtiene la contraseña del usuario a partir de la id
- *	id -> id del usuario
- */
+		client.query('SELECT nombre FROM usuarios WHERE id=?', [id], function(err, nombre) {
 
-function getPassword(id) {
+			if (err) {
 
-};
+				throw err;
+
+			}
+
+			return nombre;
+		});
+	}
+}
 
 
 /**
@@ -200,72 +205,94 @@ function getPassword(id) {
 
 function authenticate(id, key, date, response) {
 
-
-	console.log(id+ " "+ key +" "+" "+date);
-	// Consulta la contraseña en la base de datos
-	client.query('SELECT password FROM usuarios WHERE id=?', [id], function(err,password) {
-
-		if (err) {
-
-			throw err;
-
-		}
-
-		console.log("CONSULTANDO LA BASE DE DATOS PARA OBTENER CONTRASEÑA")
-
-		// Hace el hash de la contraseña y la fecha
-
-		console.log(password[0].password);
-		var md5sum = crypto.createHash('md5');
-		md5sum.update(password[0].password + date);
-		var digest = md5sum.digest('hex');
+	if (checkLength(id, key, date)) {
 
 
-		// Compara las dos contraseñas y construye la respuesta en base a ellas
-		if (key.localeCompare(digest) == 0) {
+		console.log(id + " " + key + " " + " " + date);
+		// Consulta la contraseña en la base de datos
+		client.query('SELECT password FROM usuarios WHERE id=?', [id], function(err, password) {
 
-			console.log("Usuario conectado: " + id);
-			console.log("CONTRASEÑA ACEPTADA");
+			if (err) {
 
-			var cookie = createCookie(id, 1, 1);
+				throw err;
 
-			console.log("Cookie : " + cookie);
-			registerCookie(id, cookie);
-			response(cookie, true);
+			}
 
-		} else {
+			console.log("******CONSULTANDO LA BASE DE DATOS PARA OBTENER CONTRASEÑA*****")
 
 
-			console.log("Contraseña erronea");
-
-			response(null, false);
-		}
+			// Comprueba que exista una contraseña para ese usuario
+			if (password.length) {
 
 
-	});
+				//Hace el hash de la contraseña y la fecha
+				console.log(password[0].password);
+				var md5sum = crypto.createHash('md5');
+				md5sum.update(password[0].password + date);
+				var digest = md5sum.digest('hex');
+
+				// Compara las dos contraseñas y construye la respuesta en base a ellas
+				if (key.localeCompare(digest) == 0) {
+
+					console.log("Usuario conectado: " + id);
+					console.log("CONTRASEÑA ACEPTADA");
+					var cookie = createCookie(id, 1, 1);
+					registerCookie(id, cookie);
+					response(cookie);
+					console.log("Cookie : " + cookie);
+
+				} else {
+
+					console.log("Contraseña erronea");
+					// Responde con una cadena vacia
+					response("");
+				}
 
 
+			} else {
+
+				console.log("Usuario incorrecto");
+				// Responde con una cadena vacia
+				response("");
+			}
+
+		});
+	}
 };
 
-/* Pruebas */
-/*)
-var md5sum = crypto.createHash('md5');
-md5sum.update("da867bade88be72074368ca579d44fdb" + 1);
-var digest = md5sum.digest('hex');
+/**
+ *	Funcion para comprobar la validez de los parametros facilitados
+ *	Devuelve true si todos los parametros son buenos y false en caso
+ *	contrario
+ *
+ */
 
-authenticate("sr4", digest, "1");
-insertUser("fcoentrao", "Fabio Coentrao", "soy el 5");
-*/
+function checkLength() {
 
-if (checkCookieDate("sr4=1; expires=Wed, 17 Apr 2013 14:12:20 GMT; path=/")) console.log("Cookie correcta en tiempo");
-/*checkCookie("sr4=1; expires=Wed, 17 Apr 2013 14:12:20 GMT; path=/", function() {
-	console.log("Cookie aceptada");
-});
-*/
+
+	for (var i = arguments.length - 1; i >= 0; i--) {
+
+
+		if (!arguments[i]) return false;
+
+	};
+
+	return true;
+}
+
+
+
 /***** Funciones publicas *****/
 
 // exports.getUsuario = getUsuario;
+exports.checkCookie = checkCookie;
 exports.authenticate = authenticate;
 exports.insertUser = insertUser;
 exports.deleteUser = deleteUser;
 exports.registerCookie = registerCookie;
+
+/***** Casos de prueba *****/
+
+// Contraseña vacia 
+
+//authenticate("sr4","","1654165",res);

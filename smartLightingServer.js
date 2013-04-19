@@ -12,28 +12,7 @@ function initHttpServer() {
 	var streetlightStatus = true;
 	var dim = 100;
 
-	/*
-		Validate authentication headers
-	*/
-	function authenticate(req, res, key, user){
-		
-// 		var md5sum = crypto.createHash('md5');
-// 		md5sum.update(key+req.get('Date'));
-// 		var result = md5sum.digest('hex');
-// 		string_a.localeCompare(string_b);
-// 				Returns:
-// 				 0:  exact match
-// 				-1:  string_a < string_b
-// 				 1:  string_b > string_b
-// 		if((req.get('User-Agent').localeCompare(user))==0 && (req.get('apiKey').localeCompare(result))==0){
-// 			return 0;
-// 		} else {
-// 			return 1;
-// 		}
-	
-		return usersDBAccess.isAuth(req.get('User-Agent'),req.get('apiKey'));
-	}
-	
+
 
 	/*
 		Get random temperature value between -10 and 40
@@ -155,34 +134,43 @@ function initHttpServer() {
 	 */
 	http.get('/auth', function(req, res) {
 
-		/*Pruebas REST
-		var md5sum = crypto.createHash('md5');
-		md5sum.update(req.get('apiKey') + req.get('Dates'));
-		var digest = md5sum.digest('hex');
-		poner digest como argumento
-		*/
-		console.log(req.get('User-Agent'));
-		// Solicitamos la autenticacion al adaptador
-		usersDBAccess.authenticate(req.get('User-Agent'), req.get('apiKey'), req.get('Date'), function(cookie, result) {
+
+		if (!comprobarCamposHTTP(req)) {
+
+			// Solicitamos la autenticacion al adaptador
+			usersDBAccess.authenticate(req.get('User-Agent'), req.get('apiKey'), req.get('Date'), function(cookie) {
+
+				//PARA PRUEBAS CON RESTCLIENT usersDBAccess.authenticate(req.get('User'), digest, req.get('Dates'), function(cookie) {
+
+				// Se devuelve una respuesta en funcion del resultado de la peticion
+				if (cookie.length) {
+					res.writeHead(200, {
+						"Content-Type": "text/html",
+						"Cookie": cookie
+					});
+					// PARA PRUEBAS CON RESTCLIENT res.write("Bienvenido de nuevo " + req.get('User'));
+					res.write("Bienvenido " + req.get('User-Agent'));
+
+					res.end();
+				} else {
+					res.json(402, {
+						status: 'Authentication error. Usuario o contraseña incorrectos'
+					});
+					res.end();
+				}
 
 
-			// Se devuelve una respuesta en funcion del resultado de la peticion
-			if (result) {
-				res.writeHead(200, {
-					"Content-Type": "text/html",
-					"Cookie": cookie
-				});
-				res.write("Bienvenido de nuevo " + req.get('User'));
-				res.end();
-			} else {
-				res.json(402, {
-					status: 'Authentication error. Usuario o contraseña incorrectos'
-				});
-				res.end();
-			}
 
+			});
 
-		});
+		} else {
+
+			res.json(402, {
+				status: 'Request HTTP incorrecta'
+			});
+			res.end();
+
+		}
 
 	});
 
@@ -747,22 +735,21 @@ function initHttpServer() {
 		}
 
 	});
-	
-	http.get('/resources/weather', function(req,res){
+
+	http.get('/resources/weather', function(req, res) {
 		var result = 0;
 		console.log('Request authenticated');
 		console.log('Authentication OK');
-		recursos.getUltimoTiempo(function (err, datos){
-			if (err)
-				console.log('Algo fallo al acceder a la base de datos de Tiempo');
+		recursos.getUltimoTiempo(function(err, datos) {
+			if (err) console.log('Algo fallo al acceder a la base de datos de Tiempo');
 			else {
 				res.json(200, JSON.stringify(datos));
 				res.end();
 			}
 		});
-		
+
 	});
-	
+
 }
 
 exports.initHttpServer = initHttpServer;
