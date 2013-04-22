@@ -18,17 +18,18 @@ db.once('open', function () {
 		function (errors, window) {
 			var $ = window.jQuery;
 			var a;
+			var time = new Date();
 			
-			a = $("tr:eq(0)").text().split("\n");
-			var cabeceras = new Array(8);
-			cabeceras[0] = limpiarPaja(a[1]);
-			cabeceras[1] = limpiarPaja(a[2]);
-			cabeceras[2] = "Viento (medio)";
-			cabeceras[3] = "Viento (rachas)";
-			cabeceras[4] = limpiarPaja(a[6]);
-			cabeceras[5] = limpiarPaja(a[9]);
-			cabeceras[6] = limpiarPaja(a[13]);
-			cabeceras[7] = limpiarPaja(a[16]);
+// 			a = $("tr:eq(0)").text().split("\n");
+// 			var cabeceras = new Array(8);
+// 			cabeceras[0] = limpiarPaja(a[1]);
+// 			cabeceras[1] = limpiarPaja(a[2]);
+// 			cabeceras[2] = "Viento (medio)";
+// 			cabeceras[3] = "Viento (rachas)";
+// 			cabeceras[4] = limpiarPaja(a[6]);
+// 			cabeceras[5] = limpiarPaja(a[9]);
+// 			cabeceras[6] = limpiarPaja(a[13]);
+// 			cabeceras[7] = limpiarPaja(a[16]);
 			
 			a = $("tr:eq(2)").text().split("\n");
 			var valores = new Array(8);
@@ -51,7 +52,7 @@ db.once('open', function () {
 				nubes: valores[5],	// %
 				humedad: valores[6],	// %
 				presion: valores[7],	// hPa
-				fecha: Date.now()
+				fecha: time.getTime()
 			});
 			
 			console.log(tiempo);

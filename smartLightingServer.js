@@ -723,7 +723,7 @@ function initHttpServer() {
 					if (err) console.log('Algo fallo al listar recursos');
 					else {
 						console.log('Enviando farolas...');
-						res.json(200, JSON.stringify(farolas));
+						res.json(200, farolas);
 						res.end();
 					}
 				});
@@ -756,7 +756,7 @@ function initHttpServer() {
 			if (err)
 				console.log('Algo fallo al acceder a la base de datos de Tiempo');
 			else {
-				res.json(200, JSON.stringify(datos));
+				res.json(200, datos);
 				res.end();
 			}
 		});

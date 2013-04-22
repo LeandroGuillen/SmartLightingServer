@@ -16,7 +16,7 @@ var tiempoSchema = new mongoose.Schema({
 	nubes: Number,		// %
 	humedad: Number,	// %
 	presion: Number,		// hPa
-	fecha: Date
+	fecha: Number
 });
 
 // Creacion de los modelos

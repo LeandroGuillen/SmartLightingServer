@@ -13,6 +13,7 @@ function listarRecursos(callback){
 	Farola.find({}, null, callback);
 }
 
+// Devuelve el ultimo tiempo almacenado
 function getUltimoTiempo(callback) {
 	Tiempo.findOne({}, {}, { sort: { 'fecha' : -1 } }, callback);
 }
