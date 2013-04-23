@@ -7,97 +7,6 @@ var usersDBAccess = require("./users/usuarios");
 
 
 function initHttpServer() {
-
-	var lightStatus = true;
-	var streetlightStatus = true;
-	var dim = 100;
-
-
-
-	/*
-		Get random temperature value between -10 and 40
-	*/
-	function getTemperature() {
-		//First I get a value random between 1 and 100, (1 - 100)
-		//After, divide by 2 (1 - 50)
-		//Finally, sub 10 (-10 - 40)
-		return Math.floor((Math.random() * 100) + 1) / 2 - 10;
-
-	}
-
-	/*
-		Get Light status
-	*/
-	function getLight() {
-		return lightStatus;
-
-	}
-
-	/*
-		Set Light status
-	*/
-	function setLight(newStatus) {
-		lightStatus = newStatus;
-	}
-
-	/*
-		Set Light Toggle 
-	*/
-	function setLightToggle() {
-		lightStatus = !lightStatus;
-		console.log('Toggle: New light status: ', lightStatus);
-	}
-
-
-	/*
-		Get StreetLight status
-	*/
-	function getStreetLight() {
-		return streetlightStatus;
-
-	}
-
-	/*
-		Set StreetLight status
-	*/
-	function setStreetLight(newStatus) {
-		streetlightStatus = newStatus;
-	}
-
-	/*
-		Set StreetLight Toggle 
-	*/
-	function setStreetLightToggle() {
-		streetlightStatus = !streetlightStatus;
-		console.log('Toggle: New streetlightStatus status: ', streetlightStatus);
-	}
-
-
-	/*
-		Set Dim level for the street light (Value between 1 and 100) 
-	*/
-	function setDim(level) {
-		if (level == '') console.log('Get case');
-		else if (level > 0) {
-			setStreetLight(true);
-			if (level > 100) {
-				dim = 100;
-			} else {
-				dim = level;
-			}
-		} else if (level == 0) {
-			dim = 0;
-			setStreetLight(false);
-		}
-	}
-
-	/*
-		Get Dim level for the street light (Value between 1 and 100) 
-	*/
-	function getDim() {
-		return dim;
-	}
-
 	/*
 		Load external resources (files)
 	*/
@@ -274,56 +183,6 @@ function initHttpServer() {
 
 	});
 
-	/*
-		Temp Resource
-	*/
-	http.get('/temp/temp0', function(req, res) {
-
-		//Check if some of the required headers for authentcation are "undefined"
-		if (comprobarCamposHTTP(req)) {
-			console.log('Request non authenticated\n');
-			res.json(215, {
-				status: 'Operation successfully non-authenticated',
-				temp: getTemperature()
-			});
-			res.end();
-		} else { //The request is authenticated
-
-			//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
-			var result = authenticate(req, res, 'TestKey', 'Jara');
-			console.log('Request authenticated\n');
-
-			switch (result) {
-				case 0:
-					//Authentication OK
-					console.log('Authentication OK\n');
-
-					res.json(200, {
-						status: 'Operation successfully authenticated',
-						temp: getTemperature()
-					});
-
-					res.end();
-					break;
-				case 1:
-					//Authentication Error
-					console.log('Authentication Error\n');
-					res.json(402, {
-						status: 'Authentication error'
-					});
-					res.end();
-					break;
-				default:
-					console.log('Error\n');
-					res.json(400, {
-						status: 'Error'
-					});
-					res.end();
-			}
-		}
-
-
-	});
 
 	/*
 		Light resource
@@ -692,7 +551,29 @@ function initHttpServer() {
 			}
 		}
 	});
-
+	http.get('/resources/streetlight', function(req, res) {
+		var nombreFarola = req.query.farola;
+		var encendida = req.query.encendida;
+		var dim = req.query.dim;
+		console.log('Farola seleccionada para modificacion: ', nombreFarola);
+		
+		// Actualizar la farola en la base de datos
+		recursos.actualizarFarola(nombreFarola, encendida, dim, function(err) {
+			if(err) {
+				res.json(400, {
+					status: 'No se pudo guardar la farola'
+				});
+			} else {
+				res.json(400, {
+					status: 'Farola guardada correctamente'
+				});
+			}
+			
+			// Enviar mensaje finalmente
+			res.end();
+		});
+	});
+	
 	http.get('/resources/streetlight/testlist', function(req, res) {
 
 		//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
