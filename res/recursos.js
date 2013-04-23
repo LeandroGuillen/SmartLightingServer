@@ -18,5 +18,15 @@ function getUltimoTiempo(callback) {
 	Tiempo.findOne({}, {}, { sort: { 'fecha' : -1 } }, callback);
 }
 
+// Actualiza los datos de la farolas
+function actualizarFarola(nombre, encendida, dim, callback) {
+	var conditions = { nombre: nombre};
+	var update = { encendida: encendida, dim: dim};
+	var options = { multi: false};
+	
+	Farola.update(conditions, update, options, callback);
+}
+
 exports.listarRecursos = listarRecursos;
 exports.getUltimoTiempo = getUltimoTiempo;
+exports.actualizarFarola = actualizarFarola;
