@@ -8,25 +8,6 @@ var usersDBAccess = require("./users/usuarios");
 
 function initHttpServer() {
 	/*
-		Load external resources (files)
-	*/
-	function getResource(req, res, route) {
-		//Write the header of the WebPage
-		res.writeHead(200, {
-			"Content-Type": "text/html"
-		});
-		//Get a file (useful to load external html files)
-		fs.readFile(route, function(error, data) {
-			if (error) {
-				throw error;
-			}
-			//write the content of tile as part of the reply
-			res.write(data);
-			res.end();
-		});
-	}
-
-	/*
 		Configuration functions
 	*/
 	http.configure(function() {
@@ -67,9 +48,6 @@ function initHttpServer() {
 					});
 					res.end();
 				}
-
-
-
 			});
 
 		} else {
@@ -90,7 +68,7 @@ function initHttpServer() {
 	}
 
 	/*
-		Status resource
+		Status
 	*/
 	http.get('/status', function(req, res) {
 
@@ -132,163 +110,6 @@ function initHttpServer() {
 					res.end();
 			}
 		}
-
-
-	});
-
-	/*
-		Test authentication
-	*/
-	http.get('/testauth', function(req, res) {
-
-		//Check if some of the required headers for authentcation are "undefined"
-		if (comprobarCamposHTTP(req)) {
-			console.log('Request non authenticated - Error\n');
-			res.json(400, {
-				status: 'Error'
-			});
-			res.end();
-		} else { //The request is authenticated
-
-			//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
-			var result = authenticate(req, res, 'TestKey', 'Jara');
-			console.log('Request authenticated\n');
-
-			switch (result) {
-				case 0:
-					//Authentication OK
-					console.log('Authentication OK\n');
-					res.json(200, {
-						status: 'Operation successful'
-					});
-					res.end();
-					break;
-				case 1:
-					//Authentication Error
-					console.log('Authentication Error\n');
-					res.json(402, {
-						status: 'Authentication error'
-					});
-					res.end();
-					break;
-				default:
-					console.log('Error\n');
-					res.json(400, {
-						status: 'Error'
-					});
-					res.end();
-			}
-		}
-
-
-	});
-
-
-	/*
-		Light resource
-	*/
-	http.get('/light/light0', function(req, res) {
-
-		//Check if some of the required headers for authentcation are "undefined"
-		if (comprobarCamposHTTP(req)) {
-			console.log('Request non authenticated\n');
-
-			/* First check that the parameter is defiened in order to avoid errors, second that the value is true */
-			if (!(typeof req.param('toggle') === 'undefined') && (req.param('toggle').localeCompare('true')) == 0) {
-				setLightToggle();
-				res.json(215, {
-					status: 'Operation successfully non-authenticated',
-					command: 'toggle',
-					light: getLight()
-				});
-				res.end();
-			} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('true')) == 0) {
-				setLight(true);
-				res.json(215, {
-					status: 'Operation successfully non-authenticated',
-					command: 'set',
-					light: getLight()
-				});
-				res.end();
-			} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('false')) == 0) {
-				setLight(false);
-				res.json(215, {
-					status: 'Operation successfully non-authenticated',
-					command: 'set',
-					light: getLight()
-				});
-				res.end();
-			}
-
-			res.json(215, {
-				status: 'Operation successfully non-authenticated',
-				command: 'get',
-				light: getLight()
-			});
-			res.end();
-		} else { //The request is authenticated
-
-			//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
-			var result = authenticate(req, res, 'TestKey', 'Jara');
-			console.log('Request authenticated\n');
-
-			switch (result) {
-				case 0:
-					//Authentication OK
-					console.log('Authentication OK\n');
-
-					/* First check that the parameter is defiened in order to avoid errors, second that the value is true */
-					if (!(typeof req.param('toggle') === 'undefined') && (req.param('toggle').localeCompare('true')) == 0) {
-						setLightToggle();
-						res.json(200, {
-							status: 'Operation successfully authenticated',
-							command: 'toggle',
-							light: getLight()
-						});
-						res.end();
-					} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('true')) == 0) {
-						setLight(true);
-						res.json(200, {
-							status: 'Operation successfully authenticated',
-							command: 'set',
-							light: getLight()
-						});
-						res.end();
-					} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('false')) == 0) {
-						setLight(false);
-						res.json(200, {
-							status: 'Operation successfully authenticated',
-							command: 'set',
-							light: getLight()
-						});
-						res.end();
-					}
-
-					res.json(200, {
-						status: 'Operation successfully authenticated',
-						command: 'get',
-						light: getLight()
-					});
-					res.end();
-					break;
-				case 1:
-					//Authentication Error
-					console.log('Authentication Error\n');
-					res.json(402, {
-						status: 'Authentication error'
-					});
-					res.end();
-					break;
-				default:
-					console.log('Error\n');
-					res.json(400, {
-						status: 'Error'
-					});
-					res.end();
-			}
-		}
-
-
 	});
 
 	/*
@@ -481,15 +302,6 @@ function initHttpServer() {
 
 	});
 
-
-	http.get('/test', function(req, res) {
-		res.writeHead(200, {
-			"Content-Type": "text/html"
-		});
-		res.write("ok");
-		res.end();
-	});
-
 	/*
 		Resources can be located in the following subdirectories (images, files, etc.)
 	*/
@@ -502,135 +314,75 @@ function initHttpServer() {
 	console.log("HTTP Server initiated!");
 
 	// MIS FUNCIONES	
-	http.get('/resources/streetlight/list', function(req, res) {
-		//Check if some of the required headers for authentcation are "undefined"
-		if (comprobarCamposHTTP(req)) {
-			console.log('Request non authenticated\n');
-			res.json(215, {
-				status: 'Operation successfully non-authenticated'
-			});
-			res.end();
-		} else { //The request is authenticated
-
-			//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
-			var result = authenticate(req, res, 'TestKey', 'Jara');
-			console.log('Request authenticated');
-
-			switch (result) {
-				case 0:
-					//Authentication OK
-
-					console.log('Authentication OK');
-					// 					res.json(200, { status: 'Operation successfully authenticated' });
-					recursos.listarRecursos(function(err, farolas) {
-						debugger;
-						if (err) console.log('Algo fallo al listar recursos');
-						else {
-							console.log('Enviando farolas...');
-							res.json(200, JSON.stringify(farolas));
-							res.end();
-						}
-					});
-					// 					res.json(200, { status: 'Operation successfully authenticated' });
-					// 					res.end();
-					break;
-				case 1:
-					//Authentication Error
-					console.log('Authentication Error');
-					res.json(402, {
-						status: 'Authentication error'
-					});
-					res.end();
-					break;
-				default:
-					console.log('Error');
-					res.json(400, {
-						status: 'Error'
-					});
-					res.end();
-			}
-		}
-	});
+	
 	http.get('/resources/streetlight', function(req, res) {
-		var nombreFarola = req.query.farola;
-		var encendida = req.query.encendida;
-		var dim = req.query.dim;
-		console.log('Farola seleccionada para modificacion: ', nombreFarola);
-		
-		// Actualizar la farola en la base de datos
-		recursos.actualizarFarola(nombreFarola, encendida, dim, function(err) {
-			if(err) {
-				res.json(400, {
-					status: 'No se pudo guardar la farola'
-				});
-			} else {
-				res.json(400, {
-					status: 'Farola guardada correctamente'
-				});
-			}
+		usersDBAccess.checkCookie(req.get("User-Agent"), req.get("Cookie"), function(){
+			var nombreFarola = req.query.farola;
+			var encendida = req.query.encendida;
+			var dim = req.query.dim;
+			console.log('Farola seleccionada para modificacion: ', nombreFarola);
 			
-			// Enviar mensaje finalmente
-			res.end();
+			// Actualizar la farola en la base de datos
+			recursos.actualizarFarola(nombreFarola, encendida, dim, function(err) {
+				if(err) {
+					res.json(400, {
+						status: 'No se pudo guardar la farola'
+					});
+				} else {
+					res.json(200, {
+						status: 'Farola guardada correctamente'
+					});
+				}
+				
+				// Enviar mensaje finalmente
+				res.end();
+			});
+			
 		});
 	});
 	
-	http.get('/resources/streetlight/testlist', function(req, res) {
+	http.get('/resources/streetlight/list', function(req, res) {
+		usersDBAccess.checkCookie(req.get("User-Agent"), req.get("Cookie"), function(){
+			//Authentication OK
 
-		//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
-		// 		var result = authenticate(req, res, 'TestKey', 'Jara');
-		var result = 0;
-		console.log('Request authenticated');
-
-		switch (result) {
-			case 0:
-				//Authentication OK
-
-				console.log('Authentication OK');
-				// 					res.json(200, { status: 'Operation successfully authenticated' });
-				recursos.listarRecursos(function(err, farolas) {
-					debugger;
-					if (err) console.log('Algo fallo al listar recursos');
-					else {
-						console.log('Enviando farolas...');
-						res.json(200, farolas);
-						res.end();
-					}
-				});
-				// 					res.json(200, { status: 'Operation successfully authenticated' });
-				// 					res.end();
-				break;
-			case 1:
-				//Authentication Error
-				console.log('Authentication Error');
-				res.json(402, {
-					status: 'Authentication error'
-				});
-				res.end();
-				break;
-			default:
-				console.log('Error');
-				res.json(400, {
-					status: 'Error'
-				});
-				res.end();
-		}
-
+			console.log('Authentication OK');
+			// 					res.json(200, { status: 'Operation successfully authenticated' });
+			recursos.listarRecursos(function(err, farolas) {
+				debugger;
+				if (err) console.log('Algo fallo al listar recursos');
+				else {
+					console.log('Enviando farolas...');
+					res.json(200, farolas);
+					res.end();
+				}
+			});
+		}, function(){
+			//Authentication Error
+			console.log('Authentication Error');
+			res.json(402, {
+				status: 'Authentication error'
+			});
+			res.end();
+		});
 	});
 
 	http.get('/resources/weather', function(req, res) {
 		var result = 0;
-		console.log('Request authenticated');
-		console.log('Authentication OK');
-		recursos.getUltimoTiempo(function(err, datos) {
-			if (err) console.log('Algo fallo al acceder a la base de datos de Tiempo');
-			else {
-				res.json(200, datos);
-				res.end();
-			}
+		
+		usersDBAccess.checkCookie(req.get("User-Agent"), req.get("Cookie"), function(){
+			console.log('Request authenticated');
+			console.log('Authentication OK');
+			
+			recursos.getUltimoTiempo(function(err, datos) {
+				if (err) console.log('Algo fallo al acceder a la base de datos de Tiempo');
+				else {
+					res.json(200, datos);
+					res.end();
+				}
+			});
 		});
+		
 
 	});
-
 }
-
 exports.initHttpServer = initHttpServer;
