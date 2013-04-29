@@ -5,7 +5,7 @@ var crypto = require('crypto');
 
 var client = mysql.createConnection({
 	user: 'root',
-	password: 'alumno',
+	password: 'root',
 	host: '127.0.0.1',
 	port: '3306',
 });
@@ -49,15 +49,15 @@ function registerCookie(id, cookie) {
  */
 
 
-function checkCookie(id, userCookie, action) {
-
+function checkCookie(id, userCookie, action, actionError) {
+	
 	if (checkLength(id, userCookie)) {
-
+		
 		client.query('SELECT cookie FROM cookies WHERE id = ?', [id], function(err, cookie) {
-
+			
 			if (err) {
 
-				throw err;
+				console.log(err);
 			}
 
 			// Se comprueba la veracidad y validez en el tiempo
@@ -67,10 +67,11 @@ function checkCookie(id, userCookie, action) {
 				action();
 
 			} else {
-
-				console.log("Cookie incorrecta");
+				actionError();
 			}
 		});
+	} else {
+		console.log("Error en los parametros");
 	}
 
 }
@@ -271,12 +272,8 @@ function checkLength() {
 
 
 	for (var i = arguments.length - 1; i >= 0; i--) {
-
-
 		if (!arguments[i]) return false;
-
 	};
-
 	return true;
 }
 
