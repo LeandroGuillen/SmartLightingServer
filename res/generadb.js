@@ -25,7 +25,7 @@ function crearFarolas(){
 		nombre: 'farola2',
 		encendida: false,
 		dim: 0,
-		lat: 3802438,
+		lat: 38024380,
 		lon: -1174083
 	});
 	var farola3 = new Farola({
@@ -35,14 +35,22 @@ function crearFarolas(){
 		lat: 38024635,
 		lon: -1174266
 	});
+		var farola4 = new Farola({
+		nombre: 'farola4',
+		encendida: true,
+		dim: 100,
+		lat: 37954849,
+		lon: -1152722
+	});
 	
 	// Guardar documentos
 	farola1.save();
 	farola2.save();
 	farola3.save();
-	
+	// Farola en Aljucer
+	farola4.save();
 	console.log("Farolas re-creadas");
-}
+};
 
 function borrarTodo(){
 	// Vaciar colecciones

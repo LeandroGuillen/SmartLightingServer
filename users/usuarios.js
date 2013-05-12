@@ -5,7 +5,7 @@ var crypto = require('crypto');
 
 var client = mysql.createConnection({
 	user: 'root',
-	password: 'root',
+	password: 'alumno',
 	host: '127.0.0.1',
 	port: '3306',
 });
@@ -71,6 +71,9 @@ function checkCookie(id, userCookie, action, actionError) {
 			}
 		});
 	} else {
+
+		console.log("ID" + id);
+		console.log("userCookie"+ userCookie);
 		console.log("Error en los parametros");
 	}
 
@@ -149,6 +152,44 @@ function insertUser(id, nombre, password) {
 
 }
 
+
+
+/**
+ *	Inserta usuario facilitando todos sus datos.
+ *	id -> id del  usuario
+ *	nombre -> nombre completo del usuario
+ *	password -> hash md5 del password
+ */
+
+
+function insertUser2(id, nombre, password) {
+
+
+	if (checkLength(id, nombre, password)) {
+
+		client.query('INSERT INTO usuarios SET id = ?, nombre = ?, password = SHA(?)', [id, nombre, password], function(err) {
+
+			if (err) {
+
+
+				throw err;
+
+			}
+
+		});
+
+		client.query('INSERT INTO cookies SET id = ?, cookie=""', [id], function(err) {
+
+			if (err) {
+				throw err;
+
+			}
+
+		});
+
+	}
+
+}
 
 /**
  *	Elimina un usuario facilitando la id
@@ -231,6 +272,73 @@ function authenticate(id, key, date, response) {
 				var md5sum = crypto.createHash('md5');
 				md5sum.update(password[0].password + date);
 				var digest = md5sum.digest('hex');
+
+				// Compara las dos contraseñas y construye la respuesta en base a ellas
+				if (key.localeCompare(digest) == 0) {
+
+					console.log("Usuario conectado: " + id);
+					console.log("CONTRASEÑA ACEPTADA");
+					var cookie = createCookie(id, 1, 1);
+					registerCookie(id, cookie);
+					response(cookie);
+					console.log("Cookie : " + cookie);
+
+				} else {
+
+					console.log("Contraseña erronea");
+					// Responde con una cadena vacia
+					response("");
+				}
+
+
+			} else {
+
+				console.log("Usuario incorrecto");
+				// Responde con una cadena vacia
+				response("");
+			}
+
+		});
+	}
+};
+
+
+
+
+/**
+ *	Comprueba la contraseña del usuario id.
+ *	id -> usuario
+ *	key -> hash(contraseña de id + date);
+ *	Return true si es un usuario valido o false en caso contrario
+ */
+
+function authenticateSHA(id, key, date, response) {
+
+	if (checkLength(id, key, date)) {
+
+
+		console.log(id + " " + key + " " + " " + date);
+		// Consulta la contraseña en la base de datos
+		client.query('SELECT password FROM usuarios2 WHERE id=?', [id], function(err, password) {
+
+			if (err) {
+
+				throw err;
+
+			}
+
+			console.log("******CONSULTANDO LA BASE DE DATOS PARA OBTENER CONTRASEÑA*****")
+
+
+			// Comprueba que exista una contraseña para ese usuario
+			if (password.length) {
+
+
+				//Hace el hash de la contraseña y la fecha
+				console.log(password[0].password);
+				var shasum = crypto.createHash('sha');
+				shasum.update(password[0].password + date);
+				var digest = shasum.digest('hex');
 
 				// Compara las dos contraseñas y construye la respuesta en base a ellas
 				if (key.localeCompare(digest) == 0) {
