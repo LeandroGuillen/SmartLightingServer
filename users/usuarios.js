@@ -392,6 +392,7 @@ function checkLength() {
 // exports.getUsuario = getUsuario;
 exports.checkCookie = checkCookie;
 exports.authenticate = authenticate;
+exports.authenticateSHA = authenticateSHA;
 exports.insertUser = insertUser;
 exports.deleteUser = deleteUser;
 exports.registerCookie = registerCookie;
