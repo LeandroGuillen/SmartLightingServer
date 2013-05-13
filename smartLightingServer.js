@@ -28,7 +28,12 @@ function initHttpServer() {
 		if (!comprobarCamposHTTP(req)) {
 
 			// Solicitamos la autenticacion al adaptador
-			usersDBAccess.authenticate(req.get('User-Agent'), req.get('apiKey'), req.get('Date'), function(cookie) {
+			if(req.get('HashType')==='MD5')
+				usersDBAccess.authenticate(req.get('User-Agent'), req.get('apiKey'), req.get('Date'), accion);
+			else
+				usersDBAccess.authenticateSHA(req.get('User-Agent'), req.get('apiKey'), req.get('Date'), accion);
+			
+			function accion(cookie) {
 
 				//PARA PRUEBAS CON RESTCLIENT usersDBAccess.authenticate(req.get('User'), digest, req.get('Dates'), function(cookie) {
 
@@ -48,8 +53,7 @@ function initHttpServer() {
 					});
 					res.end();
 				}
-			});
-
+			}
 		} else {
 
 			res.json(402, {
@@ -112,195 +116,6 @@ function initHttpServer() {
 		}
 	});
 
-	/*
-		Street Light resource
-		
-	*/
-	http.get('/streetlight/streetlight0', function(req, res) {
-
-		//Check if some of the required headers for authentcation are "undefined"
-		if (comprobarCamposHTTP(req)) {
-			console.log('Request non authenticated\n');
-
-			if (!(typeof req.param('lat') === 'undefined') && !(typeof req.param('lon') === 'undefined') && req.param('lat') >= 38.023661 && req.param('lat') <= 38.024079 && req.param('lon') >= -1.173911 && req.param('lon') <= -1.173552) {
-
-				console.log('Location OK');
-
-				if (!(typeof req.param('toggle') === 'undefined') && (req.param('toggle').localeCompare('true')) == 0) {
-					setStreetLightToggle();
-					res.json(201, {
-						status: 'Operation successfully geo-localized and non-authenticated',
-						command: 'toggle',
-						streetlight: getStreetLight(),
-						geo: {
-							lat: req.param('lat'),
-							lon: req.param('lon')
-						}
-					});
-					res.end();
-				} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('true')) == 0) {
-					setStreetLight(true);
-					res.json(201, {
-						status: 'Operation successfully geo-localized and non-authenticated',
-						command: 'set',
-						streetlight: getStreetLight(),
-						geo: {
-							lat: req.param('lat'),
-							lon: req.param('lon')
-						}
-					});
-					res.end();
-				} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('false')) == 0) {
-					setStreetLight(false);
-					res.json(201, {
-						status: 'Operation successfully geo-localized and non-authenticated',
-						command: 'set',
-						streetlight: getStreetLight(),
-						geo: {
-							lat: req.param('lat'),
-							lon: req.param('lon')
-						}
-					});
-					res.end();
-				} else if (!(typeof req.param('dim') === 'undefined')) {
-					setDim(req.param('dim'));
-					res.json(201, {
-						status: 'Operation successfully geo-localized and non-authenticated',
-						command: 'dim',
-						streetlight: getStreetLight(),
-						dim: getDim(),
-						geo: {
-							lat: req.param('lat'),
-							lon: req.param('lon')
-						}
-					});
-					res.end();
-				} else {
-					res.json(201, {
-						status: 'Operation successfully geo-localized and non-authenticated',
-						command: 'get',
-						streetlight: getStreetLight(),
-						geo: {
-							lat: req.param('lat'),
-							lon: req.param('lon')
-						}
-					});
-					res.end();
-				}
-
-				console.log('Geo-Location OK but authentication was non-included\n');
-			} else {
-				res.json(400, {
-					status: 'Error'
-				});
-				res.end();
-			}
-		} else { //The request is authenticated
-
-			//CHANGE 'TestKey' and ´Jara' to the key and user that you are using
-			var result = authenticate(req, res, 'TestKey', 'Jara');
-			console.log('Request authenticated\n');
-
-			switch (result) {
-				case 0:
-					//Authentication OK
-					console.log('Authentication OK\n');
-
-					/* Now verifies geo-location */
-					if (!(typeof req.param('lat') === 'undefined') && !(typeof req.param('lon') === 'undefined') && req.param('lat') >= 38.023661 && req.param('lat') <= 38.024079 && req.param('lon') >= -1.173911 && req.param('lon') <= -1.173552) {
-
-						console.log('Geo-Location OK\n');
-
-						if (!(typeof req.param('toggle') === 'undefined') && (req.param('toggle').localeCompare('true')) == 0) {
-							setStreetLightToggle();
-							res.json(200, {
-								status: 'Operation successfully authenticated and geo-localized',
-								command: 'toggle',
-								streetlight: getStreetLight(),
-								geo: {
-									lat: req.param('lat'),
-									lon: req.param('lon')
-								}
-							});
-							res.end();
-						} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('true')) == 0) {
-							setStreetLight(true);
-							res.json(200, {
-								status: 'Operation successfully authenticated and geo-localized',
-								command: 'set',
-								streetlight: getStreetLight(),
-								geo: {
-									lat: req.param('lat'),
-									lon: req.param('lon')
-								}
-							});
-							res.end();
-						} else if (!(typeof req.param('set') === 'undefined') && (req.param('set').localeCompare('false')) == 0) {
-							setStreetLight(false);
-							res.json(200, {
-								status: 'Operation successfully authenticated and geo-localized',
-								command: 'set',
-								streetlight: getStreetLight(),
-								geo: {
-									lat: req.param('lat'),
-									lon: req.param('lon')
-								}
-							});
-							res.end();
-						} else if (!(typeof req.param('dim') === 'undefined')) {
-							setDim(req.param('dim'));
-							res.json(200, {
-								status: 'Operation successfully geo-localized and non-authenticated',
-								command: 'dim',
-								streetlight: getStreetLight(),
-								dim: getDim(),
-								geo: {
-									lat: req.param('lat'),
-									lon: req.param('lon')
-								}
-							});
-							res.end();
-						} else {
-							res.json(200, {
-								status: 'Operation successfully authenticated and geo-localized',
-								command: 'get',
-								streetlight: getStreetLight(),
-								geo: {
-									lat: req.param('lat'),
-									lon: req.param('lon')
-								}
-							});
-							res.end();
-						}
-					} else {
-						res.json(403, {
-							status: 'Geo-location error'
-						});
-						res.end();
-					}
-
-
-
-					break;
-				case 1:
-					//Authentication Error
-					console.log('Authentication Error\n');
-					res.json(402, {
-						status: 'Authentication error'
-					});
-					res.end();
-					break;
-				default:
-					console.log('Error\n');
-					res.json(400, {
-						status: 'Error'
-					});
-					res.end();
-			}
-		}
-
-
-	});
 
 	/*
 		Resources can be located in the following subdirectories (images, files, etc.)
