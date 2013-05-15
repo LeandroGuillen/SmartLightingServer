@@ -51,7 +51,7 @@ function registerCookie(id, cookie) {
 
 function checkCookie(id, userCookie, action, actionError) {
 	
-	if (checkLength(id, userCookie)) {
+ 	if (checkLength(id, userCookie)) {
 		
 		client.query('SELECT cookie FROM cookies WHERE id = ?', [id], function(err, cookie) {
 			
@@ -285,6 +285,7 @@ function authenticate(id, key, date, response) {
 
 				} else {
 
+					console.log("MD5");
 					console.log("Contraseña erronea");
 					// Responde con una cadena vacia
 					response("");
@@ -335,11 +336,10 @@ function authenticateSHA(id, key, date, response) {
 
 
 				//Hace el hash de la contraseña y la fecha
-				console.log(password[0].password);
-				var shasum = crypto.createHash('sha');
-				shasum.update(password[0].password + date);
-				var digest = shasum.digest('hex');
-
+					console.log("clave: "+password[0].password);
+				var md5sum = crypto.createHash('sha1');
+				md5sum.update(password[0].password + date);
+				var digest = md5sum.digest('hex');
 				// Compara las dos contraseñas y construye la respuesta en base a ellas
 				if (key.localeCompare(digest) == 0) {
 
@@ -351,7 +351,9 @@ function authenticateSHA(id, key, date, response) {
 					console.log("Cookie : " + cookie);
 
 				} else {
-
+					console.log("Digest: "+digest);
+					console.log("key: "+key);
+					console.log("SHA");
 					console.log("Contraseña erronea");
 					// Responde con una cadena vacia
 					response("");
